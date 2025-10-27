@@ -1,0 +1,12 @@
+    # st.data_editor(df,
+    #                hide_index=True,
+    #                use_container_width=True,
+    #                key="course_data_editor",
+    #                num_rows="fixed",   #set dynamic to add cell run time to add more data excel like
+    #                column_config={"Course Code":st.column_config.TextColumn(label="Course Code",width="small"),    #tell how column should look
+    #                               "Course Name":st.column_config.TextColumn(label="Course Name",width="large")})
+
+    st.markdown("---")  #to draw horizontal divider line.Here,three hyphens are necessary
+
+
+    #shift+tab  to unindent 1 tab
