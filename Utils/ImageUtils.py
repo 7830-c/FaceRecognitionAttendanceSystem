@@ -8,37 +8,32 @@ from Utils.Paths import STUDENT_IMG_DIR, BASE_DIR, ENCODING_FILE_NAME
 
 
 def saveImage(img, idNo, name):
+    os.makedirs(STUDENT_IMG_DIR, exist_ok=True)
 
-    os.makedirs(STUDENT_IMG_DIR, exist_ok=True)  
+    img_path_name = os.path.join(STUDENT_IMG_DIR, f"{idNo}_{name}.png")
 
-    safe_name = str(name).strip().replace(" ", "_")
-    relative_path = os.path.join("Data", "StudentImages", f"{idNo}_{safe_name}.png")
-    absolute_path = os.path.normpath(os.path.join(BASE_DIR, relative_path))
+    img_path_name = os.path.normpath(img_path_name)
 
-    try:
-        img_bytes = np.frombuffer(img.read(), np.uint8)
-        img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
+    img_bytes = np.frombuffer(img.read(), np.uint8)
+    img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
 
-        if img is None:
-            raise ValueError("Uploaded file is not a valid image")
+    cv2.imwrite(img_path_name, img)
 
-        cv2.imwrite(absolute_path, img)
-        print(f"Image saved successfully at: {absolute_path}")
-        return relative_path
-
-    except Exception as e:
-        print(f"Error while saving image: {e}")
-        return None
+    print(f"Image saved at: {img_path_name}")
+    return img_path_name
 
 def get_absolute_path(relative_path):
 
-    if not relative_path: 
+    if not relative_path:
         return None
+
+    relative_path = relative_path.replace("\\", "/")
 
     if os.path.isabs(relative_path):
         return os.path.normpath(relative_path)
 
     return os.path.normpath(os.path.join(BASE_DIR, relative_path))
+
 
 
 def generateEncodings(img_path, enrollNo, Name):
@@ -93,7 +88,7 @@ def generateEncodings(img_path, enrollNo, Name):
         print("Encoding file saved successfully.")
         return 1
     except Exception as e:
-        print(f"Critical Error: Failed to save encoding file: {e}")
+        print(f"Failed to save encoding file: {e}")
         return 0
 
 

@@ -66,22 +66,48 @@ with st.container():
 
             selectedSubjectCode=subjectCodes[subjectNames.index(selectedSubject)]
 
-dates=getAttendanceDates(selectedSubjectCode)
-if len(dates)==0:
-    st.info("No attendance record found for this subject")
-else:
+    #fetch all attendance record of a subject
+    dates = getAttendanceDates(selectedSubjectCode)
 
-    date_col,att_choice_col=st.columns([1,1])
+    if len(dates) == 0:
+        st.info("No attendance record found for this subject")
+        st.stop()
+
+    monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+
+    # unique years and months
+    years = sorted({int(str(i[0]).split("-")[0]) for i in dates})
+    months = sorted({int(str(i[0]).split("-")[1]) for i in dates})
+
+    attendanceMonthNames = [monthNames[m - 1] for m in months]
+
+    # Showing filters for attendance filtering
+    year_col, month_col, date_col = st.columns([1, 1, 1])
+
+    with year_col:
+        selected_year = st.selectbox("Select Year", years)
+
+    with month_col:
+        selected_month_name = st.selectbox("Select Month", attendanceMonthNames)
+        selected_month = monthNames.index(selected_month_name) + 1
+
+    filtered_dates = [
+        d[0] for d in dates
+        if int(str(d[0]).split("-")[0]) == selected_year and int(str(d[0]).split("-")[1]) == selected_month
+    ]
 
     with date_col:
-        new_dates = []
-        for date in dates:
-            new_dates.append(date[0])
+        if filtered_dates:
+            selectedDate = st.selectbox("Select Date", filtered_dates)
+        else:
+            st.warning("No attendance record found for selected month/year.")
+            st.stop()
 
-        selectedDate = st.selectbox("Select Date", new_dates)
 
-    with att_choice_col:
-        choice=st.selectbox("Show",["All","Present","Absent"])
+    choice=st.selectbox("Show",["All","Present","Absent"])
 
 
     
@@ -126,17 +152,13 @@ else:
                 deleteAttendancOfSubjectOfDate(selectedSubjectCode,selectedDate)
                 st.rerun()
 
-
-        
-    
-
     with chartCol:
 
         present = len(enrollIDsPresent)
         total = len(students)
         absent = total - present
 
-        # DataFrame
+
         df = pd.DataFrame({
             "Status": ["Present", "Absent"],
             "Count": [present, absent]
@@ -151,7 +173,6 @@ else:
             hole=0.3
         )
 
-        # Show percentages and values on slices
         fig.update_traces(textinfo='label+percent', hoverinfo='label+value+percent')
 
         st.subheader("Attendance Overview")
