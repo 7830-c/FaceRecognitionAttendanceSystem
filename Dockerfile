@@ -1,10 +1,13 @@
 # Use official lightweight Python 3.13 image
 FROM python:3.13-slim
 
-# Install system dependencies required by OpenCV
+# Install system dependencies required by OpenCV, dlib, and general builds
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
+    cmake \
+    g++ \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
