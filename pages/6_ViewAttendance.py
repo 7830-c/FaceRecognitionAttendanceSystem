@@ -34,7 +34,6 @@ else:
     courseCodes = [course[0] for course in courses]
     courseNames = [course[1] for course in courses]
 
-
 with st.container():
     courseCol, semesterCol, subjectCol = st.columns([1, 1, 1])
 
@@ -80,9 +79,7 @@ with st.container():
 
     # unique years and months
     years = sorted({int(str(i[0]).split("-")[0]) for i in dates})
-    months = sorted({int(str(i[0]).split("-")[1]) for i in dates})
 
-    attendanceMonthNames = [monthNames[m - 1] for m in months]
 
     # Showing filters for attendance filtering
     year_col, month_col, date_col = st.columns([1, 1, 1])
@@ -90,9 +87,24 @@ with st.container():
     with year_col:
         selected_year = st.selectbox("Select Year", years)
 
+    months=set()
+    for i in dates:
+        year,month,_=str(i[0]).split("-")
+        if int(year)==selected_year:
+            months.add(int(month))
+    months=sorted(months)
+
+
+    attendanceMonthNames = [monthNames[m - 1] for m in months]
+
     with month_col:
-        selected_month_name = st.selectbox("Select Month", attendanceMonthNames)
-        selected_month = monthNames.index(selected_month_name) + 1
+        if attendanceMonthNames:
+            selected_month_name = st.selectbox("Select Month", attendanceMonthNames)
+            selected_month = monthNames.index(selected_month_name) + 1
+        else:
+            selected_month_name = None
+            selected_month = None
+            st.info("No attendance data available for this year.")
 
     filtered_dates = [
         d[0] for d in dates
@@ -158,7 +170,7 @@ with st.container():
         total = len(students)
         absent = total - present
 
-
+        # DataFrame
         df = pd.DataFrame({
             "Status": ["Present", "Absent"],
             "Count": [present, absent]
@@ -173,6 +185,7 @@ with st.container():
             hole=0.3
         )
 
+        # Show percentages and values on slices
         fig.update_traces(textinfo='label+percent', hoverinfo='label+value+percent')
 
         st.subheader("Attendance Overview")
